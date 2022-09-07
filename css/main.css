@@ -1,0 +1,115 @@
+@import "reset.css";
+@import "fonts.css";
+
+:root {
+  --color-primary: #324A66;
+  --color-accent: #F7E67C;
+  --color-background: #1F2E40;
+}
+
+html {
+  font-size: 16px;
+  overflow-x: hidden;
+}
+
+
+body {
+  font-family: "DM-Ukraina", sans-serif;
+  color: var(--color-primary);
+  background: var(--color-background);
+  user-select: none;
+  line-height: 1.5
+}
+* {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus {
+  outline: none;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  transition-duration: 300ms;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  border: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+button:focus {
+  border: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}
+
+.battleground {
+  width: calc(100vh - 200px);
+  height: calc(100vh - 200px);
+  max-width: calc(100vw - 20px);
+  display: grid;
+  grid-gap: 10px;
+  grid-template-columns: 4vh repeat(5, 1fr);
+  grid-template-rows: 4vh repeat(5, 1fr);
+}
+
+.battleground__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-accent);
+  background: var(--color-primary);
+  font-size: 2vh;
+  border-radius: 10px;
+  box-shadow: 0 0 10px var(--color-background);
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  transition-duration: 300ms;
+}
+
+.battleground__item:hover {
+  background: var(--color-accent);
+  color: var(--color-primary);
+}
+
+.battleground__item:first-child {
+  background: transparent;
+  cursor: auto;
+}
+
+.battleground__text {
+  padding-top: 1vh;
+}
+
+.battleground__field {
+  width: 100%;
+  height: 100%;
+}
+
+.battleground__img {
+  width: calc(100% - 2vh);
+}
+
+.rotate--90 {
+  transform: rotate(-90deg);
+}
