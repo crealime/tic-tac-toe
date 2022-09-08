@@ -87,6 +87,7 @@ button:focus {
   height: 100%;
   cursor: pointer;
   transition-duration: 300ms;
+  overflow: hidden;
 }
 
 .battleground__item:hover {
@@ -122,6 +123,9 @@ button:focus {
 .battleground__field {
   width: 100%;
   height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .battleground__img {

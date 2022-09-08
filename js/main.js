@@ -52,6 +52,7 @@ function init() {
 
   recognition.addEventListener("result", function(e) {
     words = [...e.results].map(result => result[0].transcript).join('')
+    console.log(words)
   })
 
   recognition.addEventListener("speechend", function() {
@@ -75,7 +76,7 @@ function init() {
   function setSymbolInField(num) {
     console.log(num)
     fields.forEach(el => {
-      if (el.dataset.num == num) el.classList.toggle('battleground__item_select')
+      if (el.dataset.num == num) el.innerHTML = `<img src="img/man.png" alt="" class="battleground__img">`
     })
   }
 
@@ -97,7 +98,6 @@ function init() {
   battleground.addEventListener('click', function(e) {
     const field = e.target.closest('.battleground__text') || null
     if (field && !field.dataset.player) {
-      console.log(field.innerText)
       speak(field.innerText)
     }
   })
