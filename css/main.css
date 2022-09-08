@@ -70,15 +70,17 @@ button:focus {
   grid-gap: 10px;
   grid-template-columns: 4vh repeat(5, 1fr);
   grid-template-rows: 4vh repeat(5, 1fr);
+  margin-bottom: 40px;
 }
 
 .battleground__item {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   color: var(--color-accent);
   background: var(--color-primary);
-  font-size: 2vh;
+  font-size: 2.5vh;
   border-radius: 10px;
   box-shadow: 0 0 10px var(--color-background);
   width: 100%;
@@ -97,8 +99,24 @@ button:focus {
   cursor: auto;
 }
 
+.battleground__item_select {
+  background: var(--color-accent);
+}
+
 .battleground__text {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   padding-top: 1vh;
+}
+
+.battleground__text_rotate {
+  writing-mode: vertical-lr;
+  transform: rotate(180deg);
+  padding-right: 1vh;
 }
 
 .battleground__field {
@@ -110,6 +128,28 @@ button:focus {
   width: calc(100% - 2vh);
 }
 
-.rotate--90 {
-  transform: rotate(-90deg);
+.speak {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid var(--color-accent);
+  background: var(--color-primary);
+  color: var(--color-accent);
+  border-radius: 10px;
+  height: 6vh;
+  transition-duration: 300ms;
+}
+
+.speak:hover {
+  cursor: pointer;
+  background: var(--color-background);
+}
+
+.speak__text {
+  padding: 1vh 3vh 0 3vh;
+  font-size: 2.5vh;
+}
+
+.speak__img {
+  height: 100%;
 }

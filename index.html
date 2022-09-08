@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Хрестики-нулики</title>
+  <title>Tic-tac-toe</title>
   <meta name="description" content="Хрестики-нулики">
   <link rel="stylesheet" href="css/main.css">
   <link rel="icon" href="img/favicon-32.png" sizes="32x32">
@@ -16,22 +16,22 @@
       <div data-player="" data-num="" class="battleground__field"></div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text">Час</div>
+      <div data-row="a" class="battleground__text">Time to</div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text">Більше</div>
+      <div data-row="b" class="battleground__text">More</div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text">Меньше</div>
+      <div data-row="c" class="battleground__text">Less</div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text">Досить</div>
+      <div data-row="d" class="battleground__text">Enough</div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text">Знову</div>
+      <div data-row="e" class="battleground__text">Again</div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text rotate--90">Їсти</div>
+      <div data-row="1" class="battleground__text battleground__text_rotate">Eat</div>
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="1" class="battleground__field"></div>
@@ -49,7 +49,7 @@
       <div data-player="" data-num="5" class="battleground__field"></div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text rotate--90">Спати</div>
+      <div data-row="2" class="battleground__text battleground__text_rotate">Sleep</div>
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="6" class="battleground__field"></div>
@@ -67,7 +67,7 @@
       <div data-player="" data-num="10" class="battleground__field"></div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text rotate--90">Кохатися</div>
+      <div data-row="3" class="battleground__text battleground__text_rotate">Love</div>
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="11" class="battleground__field"></div>
@@ -85,7 +85,7 @@
       <div data-player="" data-num="15" class="battleground__field"></div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text rotate--90">Воювати</div>
+      <div data-row="4" class="battleground__text battleground__text_rotate">Fight</div>
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="16" class="battleground__field"></div>
@@ -103,7 +103,7 @@
       <div data-player="" data-num="20" class="battleground__field"></div>
     </div>
     <div class="battleground__item">
-      <div class="battleground__text rotate--90">Працювати</div>
+      <div data-row="5" class="battleground__text battleground__text_rotate">Work</div>
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="21" class="battleground__field"></div>
@@ -119,6 +119,12 @@
     </div>
     <div class="battleground__item">
       <div data-player="" data-num="25" class="battleground__field"></div>
+    </div>
+  </div>
+  <div class="speak">
+    <div class="speak__text">Вербалізувати бажання</div>
+    <div class="speak__icon">
+      <img class="speak__img" src="img/mic.svg" alt="">
     </div>
   </div>
 </div>
