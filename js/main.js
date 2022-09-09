@@ -105,8 +105,7 @@ function isIncludeInPlayersFields(num) {
 
 function isPlayersFieldsContain(num) {
   if (PLAYERS.player.fields.includes(num)) return true
-  if (PLAYERS.computer.fields.includes(num)) return true
-  return false
+  return PLAYERS.computer.fields.includes(num)
 }
 
 function checkWinner() {
@@ -115,7 +114,7 @@ function checkWinner() {
     return acc
   }, false)
   if (PLAYERS.player.fields.length === 13) return 'Game ended in a draw'
-  if (isWinner) return currentPlayer.name
+  if (isWinner) return `${currentPlayer.name} win!`
 }
 
 function getPlayerIcon() {
@@ -165,9 +164,25 @@ function setStepOnFieldClick(e) {
   }
 }
 
+function setStepOnSpeech() {
+  const allWords = words.split(' ').reduce((acc, el) => {
+    if (rowMap[el]) acc.push(rowMap[el])
+    return acc
+  }, [])
+  if (findIntersectionOfRows(allWords)) {
+    const winner = checkWinner()
+    if (winner) resetGame(winner)
+    else {
+      changeCurrentPlayer()
+      setTimeout(setComputerStep, DELAY)
+    }
+  }
+  DOM_ELEMENTS.speakImg.classList.remove('speak__img_blink')
+}
+
 function resetGame(winner) {
   fadeIn(DOM_ELEMENTS.endPage)
-  DOM_ELEMENTS.endPageResult.textContent = `${winner} win!`
+  DOM_ELEMENTS.endPageResult.textContent = winner
 
   setTimeout(function() {
     DOM_ELEMENTS.fields.forEach(el => el.innerHTML = '')
@@ -191,7 +206,7 @@ function init() {
   DOM_ELEMENTS.endPageResult = document.querySelector('.end-page__result')
 
   DOM_ELEMENTS.rowNames.forEach((el, i) => {
-    rowMap[el.innerHTML.toLowerCase().split(' ')[0]]= WINNING_COMBINATIONS[i]
+    rowMap[el.innerHTML.toLowerCase().split(' ')[0]] = WINNING_COMBINATIONS[i]
   })
 
   DOM_ELEMENTS.endPageButton.addEventListener('click', function(e) {
@@ -201,7 +216,6 @@ function init() {
   DOM_ELEMENTS.characters.addEventListener('click', function(e) {
     const field = e.target.closest('.start-page__field') || null
     if (field) {
-      console.log(field.dataset.player)
       PLAYERS.player.gender = field.dataset.player
       PLAYERS.computer.gender = field.dataset.computer
       fadeOut(DOM_ELEMENTS.startPage)
@@ -224,21 +238,7 @@ function init() {
     DOM_ELEMENTS.resultText.textContent = words
   })
 
-  recognition.addEventListener("speechend", function() {
-    const allWords = words.split(' ').reduce((acc, el) => {
-      if (rowMap[el]) acc.push(rowMap[el])
-      return acc
-    }, [])
-    if (findIntersectionOfRows(allWords)) {
-      const winner = checkWinner()
-      if (winner) resetGame(winner)
-      else {
-        changeCurrentPlayer()
-        setTimeout(setComputerStep, DELAY)
-      }
-    }
-    DOM_ELEMENTS.speakImg.classList.remove('speak__img_blink')
-  })
+  recognition.addEventListener("speechend", setStepOnSpeech)
 
   DOM_ELEMENTS.battleground.addEventListener('click', setStepOnFieldClick)
 

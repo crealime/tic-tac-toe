@@ -120,7 +120,6 @@ button:focus {
 .end-page {
   z-index: 3;
   display: none;
-  opacity: 0;
 }
 
 .end-page__result {
