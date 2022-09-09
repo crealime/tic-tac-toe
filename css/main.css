@@ -80,7 +80,6 @@ button:focus {
 .start-page__text {
   font-size: 4vh;
   color: var(--color-accent);
-  text-shadow: 0 0 8px rgba(0, 0, 0, 20%);
   margin-bottom: 4vh;
 }
 
@@ -100,7 +99,6 @@ button:focus {
   margin: 1vh;
   background: var(--color-primary);
   border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 20%);
   transition-duration: 300ms;
 }
 
@@ -117,7 +115,6 @@ button:focus {
   color: var(--color-accent);
   font-size: 2vh;
   margin-bottom: 2vh;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 20%);
 }
 
 .end-page {
@@ -129,7 +126,6 @@ button:focus {
   color: var(--color-accent);
   font-size: 5vh;
   margin-bottom: 4vh;
-  text-shadow: 0 0 8px rgba(0, 0, 0, 20%);
 }
 
 .end-page__button {
@@ -139,7 +135,6 @@ button:focus {
   border: 1px solid var(--color-accent);
   background: var(--color-primary);
   color: var(--color-accent);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 20%);
   border-radius: 10px;
   overflow: hidden;
   height: 6vh;
@@ -173,7 +168,6 @@ button:focus {
   background: var(--color-primary);
   font-size: 2vh;
   border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 20%);
   width: 100%;
   height: 100%;
   cursor: pointer;
@@ -234,7 +228,6 @@ button:focus {
   border-radius: 10px;
   overflow: hidden;
   height: 6vh;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 20%);
   transition-duration: 300ms;
 }
 
