@@ -62,15 +62,21 @@ button:focus {
   height: 100vh;
 }
 
+.result-text {
+  color: var(--color-accent);
+  font-size: 2vh;
+  margin-bottom: 2vh;
+}
+
 .battleground {
-  width: calc(100vh - 200px);
-  height: calc(100vh - 200px);
+  width: 75vh;
+  height: 75vh;
   max-width: calc(100vw - 20px);
   display: grid;
   grid-gap: 10px;
   grid-template-columns: 4vh repeat(5, 1fr);
   grid-template-rows: 4vh repeat(5, 1fr);
-  margin-bottom: 40px;
+  margin-bottom: 5vh;
 }
 
 .battleground__item {
@@ -80,7 +86,7 @@ button:focus {
   align-items: center;
   color: var(--color-accent);
   background: var(--color-primary);
-  font-size: 2.5vh;
+  font-size: 2vh;
   border-radius: 10px;
   box-shadow: 0 0 10px var(--color-background);
   width: 100%;
@@ -129,7 +135,8 @@ button:focus {
 }
 
 .battleground__img {
-  width: calc(100% - 2vh);
+  max-width: calc(100% - 10px);
+  max-height: calc(100% - 20px);
 }
 
 .speak {
@@ -140,6 +147,7 @@ button:focus {
   background: var(--color-primary);
   color: var(--color-accent);
   border-radius: 10px;
+  overflow: hidden;
   height: 6vh;
   transition-duration: 300ms;
 }
@@ -154,6 +162,34 @@ button:focus {
   font-size: 2.5vh;
 }
 
-.speak__img {
+.speak__icon {
+  width: 7vh;
   height: 100%;
+  background: var(--color-accent);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
+.speak__img {
+  height: calc(100% - 2vh)
+}
+
+.speak__img_blink {
+  animation: blink 1000ms infinite ease-in;
+}
+
+@keyframes blink {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+
