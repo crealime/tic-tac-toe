@@ -15,7 +15,7 @@ const WINNING_COMBINATIONS = [
 const DELAY = 500
 const PLAYERS = {
   player: {
-    name: 'Player',
+    name: 'You',
     gender: 'male',
     fields: []
   },
@@ -35,16 +35,37 @@ recognition.interimResults = true
 recognition.maxAlternatives = 1
 recognition.lang = 'en-US'
 
-function resetGame() {
-  setTimeout(function() {
-    DOM_ELEMENTS.fields.forEach(el => el.innerHTML = '')
-    PLAYERS.player.fields = []
-    PLAYERS.computer.fields = []
-  }, DELAY)
-}
-
 function changeCurrentPlayer() {
   currentPlayer === PLAYERS.player ? currentPlayer = PLAYERS.computer : currentPlayer = PLAYERS.player
+}
+
+function fadeIn(showElement) {
+  showElement.style.display = 'flex'
+  const animation = showElement.animate([
+    {opacity: 0,},
+    {opacity: 1}
+  ], {
+    duration: DELAY,
+    easing: 'ease-in'
+  })
+
+  animation.addEventListener('finish', function() {
+    showElement.style.opacity = '1'
+  })
+}
+
+function fadeOut(hideElement) {
+  const animation = hideElement.animate([
+    {opacity: 1},
+    {opacity: 0}
+  ], {
+    duration: DELAY,
+    easing: 'ease-out'
+  })
+
+  animation.addEventListener('finish', function() {
+    hideElement.style.display = 'none'
+  })
 }
 
 function getTwoRandomProperties(obj) {
@@ -64,9 +85,8 @@ function setComputerStep() {
   else if (!findIntersectionOfRows([rowMap[properties[0]], rowMap[properties[1]]])) setComputerStep()
   else {
     speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
-    if (checkWinner()) {
-      resetGame()
-    }
+    const winner = checkWinner()
+    if (winner) resetGame(winner)
     else changeCurrentPlayer()
   }
 }
@@ -131,7 +151,8 @@ function setStepOnFieldClick(e) {
     if (!isPlayersFieldsContain(numOfField)) {
       currentPlayer.fields.push(numOfField)
       field.innerHTML = getPlayerIcon()
-      if (checkWinner()) resetGame()
+      const winner = checkWinner()
+      if (winner) resetGame(winner)
       else {
         changeCurrentPlayer()
         DOM_ELEMENTS.battleground.removeEventListener('click', setStepOnFieldClick)
@@ -144,6 +165,18 @@ function setStepOnFieldClick(e) {
   }
 }
 
+function resetGame(winner) {
+  fadeIn(DOM_ELEMENTS.endPage)
+  DOM_ELEMENTS.endPageResult.textContent = `${winner} win!`
+
+  setTimeout(function() {
+    DOM_ELEMENTS.fields.forEach(el => el.innerHTML = '')
+    PLAYERS.player.fields = []
+    PLAYERS.computer.fields = []
+    currentPlayer = PLAYERS.player
+  }, DELAY * 2)
+}
+
 function init() {
   DOM_ELEMENTS.battleground = document.querySelector('.battleground')
   DOM_ELEMENTS.fields = document.querySelectorAll('.battleground__field')
@@ -151,9 +184,28 @@ function init() {
   DOM_ELEMENTS.speakButton = document.querySelector('.speak')
   DOM_ELEMENTS.resultText = document.querySelector('.result-text')
   DOM_ELEMENTS.speakImg = document.querySelector('.speak__img')
+  DOM_ELEMENTS.startPage = document.querySelector('.start-page')
+  DOM_ELEMENTS.characters = document.querySelector('.start-page__characters')
+  DOM_ELEMENTS.endPage = document.querySelector('.end-page')
+  DOM_ELEMENTS.endPageButton = document.querySelector('.end-page__button')
+  DOM_ELEMENTS.endPageResult = document.querySelector('.end-page__result')
 
   DOM_ELEMENTS.rowNames.forEach((el, i) => {
     rowMap[el.innerHTML.toLowerCase().split(' ')[0]]= WINNING_COMBINATIONS[i]
+  })
+
+  DOM_ELEMENTS.endPageButton.addEventListener('click', function(e) {
+    fadeOut(DOM_ELEMENTS.endPage)
+  })
+
+  DOM_ELEMENTS.characters.addEventListener('click', function(e) {
+    const field = e.target.closest('.start-page__field') || null
+    if (field) {
+      console.log(field.dataset.player)
+      PLAYERS.player.gender = field.dataset.player
+      PLAYERS.computer.gender = field.dataset.computer
+      fadeOut(DOM_ELEMENTS.startPage)
+    }
   })
 
   DOM_ELEMENTS.speakButton.addEventListener('click', function() {
@@ -178,10 +230,11 @@ function init() {
       return acc
     }, [])
     if (findIntersectionOfRows(allWords)) {
-      if (checkWinner()) resetGame()
+      const winner = checkWinner()
+      if (winner) resetGame(winner)
       else {
         changeCurrentPlayer()
-        setComputerStep()
+        setTimeout(setComputerStep, DELAY)
       }
     }
     DOM_ELEMENTS.speakImg.classList.remove('speak__img_blink')
