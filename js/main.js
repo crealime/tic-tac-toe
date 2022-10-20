@@ -1,4 +1,4 @@
-const WINNING_COMBINATIONS = [
+const LINES = [
   [1,6,11,16,21],
   [2,7,12,17,22],
   [3,8,13,18,23],
@@ -12,8 +12,14 @@ const WINNING_COMBINATIONS = [
   [1,7,13,19,25],
   [5,9,13,17,21]
 ]
+const winningCombinations = LINES.reduce((acc, line) => {
+  acc.push(line.slice(0, -1), line.slice(1))
+  return acc
+}, [])
+winningCombinations.push([6,12,18,24], [2,8,14,20], [16,12,8,4], [22,18,14,10])
+console.log(winningCombinations)
 const DELAY = 500
-const PLAYERS = {
+const players = {
   player: {
     name: 'You',
     gender: 'male',
@@ -25,9 +31,9 @@ const PLAYERS = {
     fields: []
   }
 }
-const DOM_ELEMENTS = {}
-const rowMap = {}
-let currentPlayer = PLAYERS.player
+const domElements = {}
+const lineMap = {}
+let currentPlayer = players.player
 let words = ''
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 const recognition = new SpeechRecognition()
@@ -36,7 +42,7 @@ recognition.maxAlternatives = 1
 recognition.lang = 'en-US'
 
 function changeCurrentPlayer() {
-  currentPlayer === PLAYERS.player ? currentPlayer = PLAYERS.computer : currentPlayer = PLAYERS.player
+  currentPlayer === players.player ? currentPlayer = players.computer : currentPlayer = players.player
 }
 
 function fadeIn(showElement) {
@@ -68,27 +74,52 @@ function fadeOut(hideElement) {
   })
 }
 
-function getTwoRandomProperties(obj) {
-  let keys = Object.keys(obj)
+function getTwoRandomProperties(map) {
+  let keys = Object.keys(map)
   const oneProp = keys[keys.length * Math.random() << 0]
   const twoProp = keys[keys.length * Math.random() << 0]
 
   if (oneProp !== twoProp) {
     return [oneProp, twoProp]
   }
-  else return getTwoRandomProperties(obj)
+  else return getTwoRandomProperties(map)
 }
 
+// function setComputerStep() {
+//   const properties = getTwoRandomProperties(lineMap)
+//   if (players.player.fields.length > 12) return false
+//   else if (!findIntersectionOfLines([lineMap[properties[0]], lineMap[properties[1]]])) setComputerStep()
+//   else {
+//     speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
+//     const winner = checkWinner()
+//     if (winner) resetGame(winner)
+//     else changeCurrentPlayer()
+//   }
+// }
+
 function setComputerStep() {
-  const properties = getTwoRandomProperties(rowMap)
-  if (PLAYERS.player.fields.length > 12) return false
-  else if (!findIntersectionOfRows([rowMap[properties[0]], rowMap[properties[1]]])) setComputerStep()
+  winningCombinations.forEach((combination, index) => {
+
+    const numberOf = combination.reduce((acc, fieldNumber) => {
+      if (players.player.fields.includes(fieldNumber)) acc++
+      return acc
+    }, 0)
+
+    if (numberOf > 1) console.log(combination)
+
+    // setSymbolInField(numOfField)
+    // currentPlayer.fields.push(numOfField)
+  })
+  const properties = getTwoRandomProperties(lineMap)
+  if (players.player.fields.length > 12) return false
+  else if (!findIntersectionOfLines([lineMap[properties[0]], lineMap[properties[1]]])) setComputerStep()
   else {
     speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
     const winner = checkWinner()
     if (winner) resetGame(winner)
     else changeCurrentPlayer()
   }
+
 }
 
 function speak(text) {
@@ -100,20 +131,21 @@ function speak(text) {
 }
 
 function isIncludeInPlayersFields(num) {
-  return PLAYERS.player.fields.includes(num) || PLAYERS.computer.fields.includes(num)
+  return players.player.fields.includes(num) || players.computer.fields.includes(num)
 }
 
 function isPlayersFieldsContain(num) {
-  if (PLAYERS.player.fields.includes(num)) return true
-  return PLAYERS.computer.fields.includes(num)
+  if (players.player.fields.includes(num)) return true
+  return players.computer.fields.includes(num)
 }
 
 function checkWinner() {
-  const isWinner = Object.values(WINNING_COMBINATIONS).reduce((acc, combination) => {
+  const isWinner = Object.values(winningCombinations).reduce((acc, combination) => {
     if (combination.every(el => currentPlayer.fields.includes(el))) acc = true
     return acc
   }, false)
-  if (PLAYERS.player.fields.length === 13) return 'Game ended in a draw'
+
+  if (players.player.fields.length === 13) return 'Game ended in a draw'
   if (isWinner) return `${currentPlayer.name} win!`
 }
 
@@ -121,7 +153,7 @@ function getPlayerIcon() {
   return `<img src="img/${currentPlayer.gender}.png" alt="" class="battleground__img">`
 }
 
-function findIntersectionOfRows(rows) {
+function findIntersectionOfLines(rows) {
   if (rows.length === 2 && rows[0].join('') !== rows[1].join('')) {
     const numOfField = rows[0].reduce((acc, el) => {
       if (rows[1].includes(el)) acc = el
@@ -138,7 +170,7 @@ function findIntersectionOfRows(rows) {
 }
 
 function setSymbolInField(num) {
-  DOM_ELEMENTS.fields.forEach(el => {
+  domElements.fields.forEach(el => {
     if (parseInt(el.dataset.num) === num) el.innerHTML = getPlayerIcon()
   })
 }
@@ -154,9 +186,9 @@ function setStepOnFieldClick(e) {
       if (winner) resetGame(winner)
       else {
         changeCurrentPlayer()
-        DOM_ELEMENTS.battleground.removeEventListener('click', setStepOnFieldClick)
+        domElements.battleground.removeEventListener('click', setStepOnFieldClick)
         setTimeout(function() {
-          DOM_ELEMENTS.battleground.addEventListener('click', setStepOnFieldClick)
+          domElements.battleground.addEventListener('click', setStepOnFieldClick)
           setComputerStep()
         }, DELAY)
       }
@@ -166,10 +198,10 @@ function setStepOnFieldClick(e) {
 
 function setStepOnSpeech() {
   const allWords = words.split(' ').reduce((acc, el) => {
-    if (rowMap[el]) acc.push(rowMap[el])
+    if (lineMap[el]) acc.push(lineMap[el])
     return acc
   }, [])
-  if (findIntersectionOfRows(allWords)) {
+  if (findIntersectionOfLines(allWords)) {
     const winner = checkWinner()
     if (winner) resetGame(winner)
     else {
@@ -177,72 +209,72 @@ function setStepOnSpeech() {
       setTimeout(setComputerStep, DELAY)
     }
   }
-  DOM_ELEMENTS.speakImg.classList.remove('speak__img_blink')
+  domElements.speakImg.classList.remove('speak__img_blink')
 }
 
 function resetGame(winner) {
-  fadeIn(DOM_ELEMENTS.endPage)
-  DOM_ELEMENTS.endPageResult.textContent = winner
+  fadeIn(domElements.endPage)
+  domElements.endPageResult.textContent = winner
 
   setTimeout(function() {
-    DOM_ELEMENTS.fields.forEach(el => el.innerHTML = '')
-    PLAYERS.player.fields = []
-    PLAYERS.computer.fields = []
-    currentPlayer = PLAYERS.player
+    domElements.fields.forEach(el => el.innerHTML = '')
+    players.player.fields = []
+    players.computer.fields = []
+    currentPlayer = players.player
   }, DELAY * 2)
 }
 
 function init() {
-  DOM_ELEMENTS.battleground = document.querySelector('.battleground')
-  DOM_ELEMENTS.fields = document.querySelectorAll('.battleground__field')
-  DOM_ELEMENTS.rowNames = document.querySelectorAll('.battleground__text')
-  DOM_ELEMENTS.speakButton = document.querySelector('.speak')
-  DOM_ELEMENTS.resultText = document.querySelector('.result-text')
-  DOM_ELEMENTS.speakImg = document.querySelector('.speak__img')
-  DOM_ELEMENTS.startPage = document.querySelector('.start-page')
-  DOM_ELEMENTS.characters = document.querySelector('.start-page__characters')
-  DOM_ELEMENTS.endPage = document.querySelector('.end-page')
-  DOM_ELEMENTS.endPageButton = document.querySelector('.end-page__button')
-  DOM_ELEMENTS.endPageResult = document.querySelector('.end-page__result')
+  domElements.battleground = document.querySelector('.battleground')
+  domElements.fields = document.querySelectorAll('.battleground__field')
+  domElements.rowNames = document.querySelectorAll('.battleground__text')
+  domElements.speakButton = document.querySelector('.speak')
+  domElements.resultText = document.querySelector('.result-text')
+  domElements.speakImg = document.querySelector('.speak__img')
+  domElements.startPage = document.querySelector('.start-page')
+  domElements.characters = document.querySelector('.start-page__characters')
+  domElements.endPage = document.querySelector('.end-page')
+  domElements.endPageButton = document.querySelector('.end-page__button')
+  domElements.endPageResult = document.querySelector('.end-page__result')
 
-  DOM_ELEMENTS.rowNames.forEach((el, i) => {
-    rowMap[el.innerHTML.toLowerCase().split(' ')[0]] = WINNING_COMBINATIONS[i]
+  domElements.rowNames.forEach((el, i) => {
+    lineMap[el.innerHTML.toLowerCase().split(' ')[0]] = LINES[i]
   })
 
-  DOM_ELEMENTS.endPageButton.addEventListener('click', function(e) {
-    fadeOut(DOM_ELEMENTS.endPage)
+  domElements.endPageButton.addEventListener('click', function(e) {
+    fadeOut(domElements.endPage)
   })
 
-  DOM_ELEMENTS.characters.addEventListener('click', function(e) {
+  domElements.characters.addEventListener('click', function(e) {
     const field = e.target.closest('.start-page__field') || null
     if (field) {
-      PLAYERS.player.gender = field.dataset.player
-      PLAYERS.computer.gender = field.dataset.computer
-      fadeOut(DOM_ELEMENTS.startPage)
+      players.player.gender = field.dataset.player
+      players.computer.gender = field.dataset.computer
+      fadeOut(domElements.startPage)
     }
   })
 
-  DOM_ELEMENTS.speakButton.addEventListener('click', function() {
-    if (!DOM_ELEMENTS.speakImg.closest('.speak__img_blink')) {
+  domElements.speakButton.addEventListener('click', function() {
+    if (!domElements.speakImg.closest('.speak__img_blink')) {
       recognition.start()
-      DOM_ELEMENTS.speakImg.classList.add('speak__img_blink')
+      domElements.speakImg.classList.add('speak__img_blink')
     }
     else {
       recognition.stop()
-      DOM_ELEMENTS.speakImg.classList.remove('speak__img_blink')
+      domElements.speakImg.classList.remove('speak__img_blink')
     }
   })
 
   recognition.addEventListener("result", function(e) {
     words = [...e.results].map(result => result[0].transcript).join(' ').toLowerCase()
-    DOM_ELEMENTS.resultText.textContent = words
+    domElements.resultText.textContent = words
   })
 
   recognition.addEventListener("speechend", setStepOnSpeech)
 
-  DOM_ELEMENTS.battleground.addEventListener('click', setStepOnFieldClick)
+  domElements.battleground.addEventListener('click', setStepOnFieldClick)
 
-  DOM_ELEMENTS.battleground.addEventListener('click', function(e) {
+  domElements.battleground.addEventListener('click', function(e) {
     const field = e.target.closest('.battleground__text') || null
     if (field && !field.dataset.player) {
       speak(field.innerText)
