@@ -138,6 +138,18 @@ function setComputerStep() {
   }
 }
 
+function randomComputerStep() {
+  const properties = getTwoRandomProperties(lineMap)
+  if (players.player.fields.length > 12) return false
+  else if (!findIntersectionOfRows([lineMap[properties[0]], lineMap[properties[1]]])) randomComputerStep()
+  else {
+    speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
+    const winner = checkWinner()
+    if (winner) resetGame(winner)
+    else changeCurrentPlayer()
+  }
+}
+
 function speakComputerStep(field) {
   let words = []
   for (let word in lineMap) {
