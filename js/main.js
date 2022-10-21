@@ -17,7 +17,6 @@ const winningCombinations = LINES.reduce((acc, line) => {
   return acc
 }, [])
 winningCombinations.push([6,12,18,24], [2,8,14,20], [16,12,8,4], [22,18,14,10])
-console.log(winningCombinations)
 const DELAY = 500
 const players = {
   player: {
@@ -85,41 +84,66 @@ function getTwoRandomProperties(map) {
   else return getTwoRandomProperties(map)
 }
 
-// function setComputerStep() {
-//   const properties = getTwoRandomProperties(lineMap)
-//   if (players.player.fields.length > 12) return false
-//   else if (!findIntersectionOfLines([lineMap[properties[0]], lineMap[properties[1]]])) setComputerStep()
-//   else {
-//     speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
-//     const winner = checkWinner()
-//     if (winner) resetGame(winner)
-//     else changeCurrentPlayer()
-//   }
-// }
-
 function setComputerStep() {
+  let mostWeightComputer = [0, []]
+  let mostWeightPlayer = [0, []]
+
   winningCombinations.forEach((combination, index) => {
 
-    const numberOf = combination.reduce((acc, fieldNumber) => {
+    let weightComputer = combination.reduce((acc, fieldNumber) => {
+      if (players.computer.fields.includes(fieldNumber)) acc++
+      return acc
+    }, 0)
+
+    let weightPlayer = combination.reduce((acc, fieldNumber) => {
       if (players.player.fields.includes(fieldNumber)) acc++
       return acc
     }, 0)
 
-    if (numberOf > 1) console.log(combination)
-
-    // setSymbolInField(numOfField)
-    // currentPlayer.fields.push(numOfField)
+    if (!(weightComputer && weightPlayer)) {
+      if (mostWeightPlayer[0] < weightPlayer) mostWeightPlayer = [weightPlayer, combination]
+      if (mostWeightComputer[0] < weightComputer) mostWeightComputer = [weightComputer, combination]
+    }
   })
-  const properties = getTwoRandomProperties(lineMap)
-  if (players.player.fields.length > 12) return false
-  else if (!findIntersectionOfLines([lineMap[properties[0]], lineMap[properties[1]]])) setComputerStep()
-  else {
-    speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
-    const winner = checkWinner()
-    if (winner) resetGame(winner)
-    else changeCurrentPlayer()
-  }
 
+  if (mostWeightPlayer[0] > mostWeightComputer[0]) {
+    const fillingField = mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))[0]
+
+    speakComputerStep(fillingField)
+
+    domElements.fields.forEach(field => {
+      if (parseInt(field.dataset.num) === fillingField) {
+        currentPlayer.fields.push(fillingField)
+        field.innerHTML = getPlayerIcon()
+        const winner = checkWinner()
+        if (winner) resetGame(winner)
+        else changeCurrentPlayer()
+      }
+    })
+  }
+  else {
+    const fillingField = mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0]
+
+    speakComputerStep(fillingField)
+
+    domElements.fields.forEach(field => {
+      if (parseInt(field.dataset.num) === fillingField) {
+        currentPlayer.fields.push(fillingField)
+        field.innerHTML = getPlayerIcon()
+        const winner = checkWinner()
+        if (winner) resetGame(winner)
+        else changeCurrentPlayer()
+      }
+    })
+  }
+}
+
+function speakComputerStep(field) {
+  let words = []
+  for (let word in lineMap) {
+    if (lineMap[word].includes(field)) words.push(word)
+  }
+  speak(`${words[0] === 'time' ? 'time to' : words[0]} ${words[1] === 'time' ? 'time to' : words[1]}`)
 }
 
 function speak(text) {
