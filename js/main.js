@@ -71,6 +71,10 @@ function fadeOut(hiddenElement) {
   })
 }
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * max);
+}
+
 function defineComputerStep() {
   let mostWeightComputer = [0, []]
   let mostWeightPlayer = [0, []]
@@ -93,25 +97,32 @@ function defineComputerStep() {
   })
 
   if (mostWeightPlayer[0] > mostWeightComputer[0]) {
-    setComputerStep(mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))[0])
+    const stepOptions = mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))
+    setComputerStep(stepOptions[getRandomInt(stepOptions.length)])
   }
   else {
-    setComputerStep(mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0])
+    const stepOptions = mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))
+    setComputerStep(stepOptions[getRandomInt(stepOptions.length)])
   }
 }
 
 function setComputerStep(fillingField) {
   if (!fillingField) {
+    const stepOptions = []
+
     domElements.fields.forEach(field => {
-      const fieldNum = parseInt(field.dataset.num)
-      if (!players.player.fields.includes(fieldNum) && !players.computer.fields.includes(fieldNum)) fillingField = fieldNum
+      const fieldNum = parseInt(field.dataset.number)
+      if (!players.player.fields.includes(fieldNum)
+        && !players.computer.fields.includes(fieldNum)) stepOptions.push(fieldNum)
     })
+
+    fillingField = stepOptions[getRandomInt(stepOptions.length)]
   }
 
   speakComputerStep(fillingField)
 
   domElements.fields.forEach(field => {
-    if (parseInt(field.dataset.num) === fillingField) {
+    if (parseInt(field.dataset.number) === fillingField) {
       currentPlayer.fields.push(fillingField)
       field.innerHTML = getPlayerIcon()
       const winner = checkWinner()
@@ -137,20 +148,17 @@ function speak(text) {
   speechSynthesis.speak(speakThis)
 }
 
-function isIncludeInPlayersFields(num) {
-  return players.player.fields.includes(num) || players.computer.fields.includes(num)
+function isIncludeInPlayersFields(fieldNumber) {
+  return players.player.fields.includes(fieldNumber) || players.computer.fields.includes(fieldNumber)
 }
 
-function isPlayersFieldsContain(num) {
-  if (players.player.fields.includes(num)) return true
-  return players.computer.fields.includes(num)
+function isPlayersFieldsContain(fieldNumber) {
+  if (players.player.fields.includes(fieldNumber)) return true
+  return players.computer.fields.includes(fieldNumber)
 }
 
 function checkWinner() {
-  const isWinner = Object.values(winningCombinations).reduce((acc, combination) => {
-    if (combination.every(el => currentPlayer.fields.includes(el))) acc = true
-    return acc
-  }, false)
+const isWinner = Boolean(Object.values(winningCombinations).filter(combination => combination.every(fieldNumber => currentPlayer.fields.includes(fieldNumber)))[0])
 
   if (players.player.fields.length === 13) return 'Game ended in a draw'
   if (isWinner) return currentPlayer === players.player ? 'You win!' : 'You lose!'
@@ -161,12 +169,9 @@ function getPlayerIcon() {
   return `<img src="img/${currentPlayer.gender}.png" alt="" class="battleground__img">`
 }
 
-function findIntersectionOfLines(rows) {
-  if (rows.length === 2 && rows[0].join('') !== rows[1].join('')) {
-    const numOfField = rows[0].reduce((acc, el) => {
-      if (rows[1].includes(el)) acc = el
-      return acc
-    }, null)
+function findIntersectionOfLines(lines) {
+  if (lines.length === 2 && lines[0].join('') !== lines[1].join('')) {
+    const numOfField = lines[0].filter(fieldNumber => lines[1].includes(fieldNumber))[0]
     if (numOfField && !isIncludeInPlayersFields(numOfField)) {
       setSymbolInField(numOfField)
       currentPlayer.fields.push(numOfField)
@@ -177,38 +182,37 @@ function findIntersectionOfLines(rows) {
   return false
 }
 
-function setSymbolInField(num) {
-  domElements.fields.forEach(el => {
-    if (parseInt(el.dataset.num) === num) el.innerHTML = getPlayerIcon()
+function setSymbolInField(fieldNumber) {
+  domElements.fields.forEach(field => {
+    if (parseInt(field.dataset.number) === fieldNumber) field.innerHTML = getPlayerIcon()
   })
 }
 
 function setStepOnFieldClick(e) {
   const field = e.target.closest('.battleground__field') || null
-  if (field) {
-    const numOfField = parseInt(field.dataset.num)
-    if (!isPlayersFieldsContain(numOfField)) {
-      currentPlayer.fields.push(numOfField)
-      field.innerHTML = getPlayerIcon()
-      const winner = checkWinner()
-      if (winner) resetGame(winner)
-      else {
-        changeCurrentPlayer()
-        domElements.battleground.removeEventListener('click', setStepOnFieldClick)
-        setTimeout(function() {
-          domElements.battleground.addEventListener('click', setStepOnFieldClick)
-          defineComputerStep()
-        }, DELAY)
-      }
-    }
+
+  if (!field) return null
+
+  const numOfField = parseInt(field.dataset.number)
+
+  if (isPlayersFieldsContain(numOfField)) return null
+
+  currentPlayer.fields.push(numOfField)
+  field.innerHTML = getPlayerIcon()
+  const winner = checkWinner()
+  if (winner) resetGame(winner)
+  else {
+    changeCurrentPlayer()
+    domElements.battleground.removeEventListener('click', setStepOnFieldClick)
+    setTimeout(function() {
+      domElements.battleground.addEventListener('click', setStepOnFieldClick)
+      defineComputerStep()
+    }, DELAY)
   }
 }
 
 function setStepOnSpeech() {
-  const allWords = resultWords.split(' ').reduce((acc, el) => {
-    if (lineMap[el]) acc.push(lineMap[el])
-    return acc
-  }, [])
+  const allWords = resultWords.split(' ').filter(word => lineMap[word]).map(word => lineMap[word])
   if (findIntersectionOfLines(allWords)) {
     const winner = checkWinner()
     if (winner) resetGame(winner)
@@ -247,7 +251,7 @@ function init() {
   domElements.endPageResult = document.querySelector('.end-page__result')
 
   domElements.rowNames.forEach((el, i) => {
-    lineMap[el.innerHTML.toLowerCase().split(' ')[0]] = LINES[i]
+    lineMap[el.textContent.toLowerCase().split(' ')[0]] = LINES[i]
   })
 
   domElements.endPageButton.addEventListener('click', function(e) {
