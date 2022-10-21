@@ -20,12 +20,10 @@ winningCombinations.push([6,12,18,24], [2,8,14,20], [16,12,8,4], [22,18,14,10])
 const DELAY = 500
 const players = {
   player: {
-    name: 'You',
     gender: 'male',
     fields: []
   },
   computer: {
-    name: 'Computer',
     gender: 'female',
     fields: []
   }
@@ -33,7 +31,7 @@ const players = {
 const domElements = {}
 const lineMap = {}
 let currentPlayer = players.player
-let words = ''
+let resultWords = ''
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 const recognition = new SpeechRecognition()
 recognition.interimResults = true
@@ -44,9 +42,9 @@ function changeCurrentPlayer() {
   currentPlayer === players.player ? currentPlayer = players.computer : currentPlayer = players.player
 }
 
-function fadeIn(showElement) {
-  showElement.style.display = 'flex'
-  const animation = showElement.animate([
+function fadeIn(shownElement) {
+  shownElement.style.display = 'flex'
+  const animation = shownElement.animate([
     {opacity: 0,},
     {opacity: 1}
   ], {
@@ -55,12 +53,12 @@ function fadeIn(showElement) {
   })
 
   animation.addEventListener('finish', function() {
-    showElement.style.opacity = '1'
+    shownElement.style.opacity = '1'
   })
 }
 
-function fadeOut(hideElement) {
-  const animation = hideElement.animate([
+function fadeOut(hiddenElement) {
+  const animation = hiddenElement.animate([
     {opacity: 1},
     {opacity: 0}
   ], {
@@ -69,22 +67,21 @@ function fadeOut(hideElement) {
   })
 
   animation.addEventListener('finish', function() {
-    hideElement.style.display = 'none'
+    hiddenElement.style.display = 'none'
   })
 }
 
-function setComputerStep() {
+function defineComputerStep() {
   let mostWeightComputer = [0, []]
   let mostWeightPlayer = [0, []]
 
   winningCombinations.forEach((combination, index) => {
-
-    let weightComputer = combination.reduce((acc, fieldNumber) => {
+    const weightComputer = combination.reduce((acc, fieldNumber) => {
       if (players.computer.fields.includes(fieldNumber)) acc++
       return acc
     }, 0)
 
-    let weightPlayer = combination.reduce((acc, fieldNumber) => {
+    const weightPlayer = combination.reduce((acc, fieldNumber) => {
       if (players.player.fields.includes(fieldNumber)) acc++
       return acc
     }, 0)
@@ -96,42 +93,32 @@ function setComputerStep() {
   })
 
   if (mostWeightPlayer[0] > mostWeightComputer[0]) {
-    const fillingField = mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))[0]
-
-    speakComputerStep(fillingField)
-
-    domElements.fields.forEach(field => {
-      if (parseInt(field.dataset.num) === fillingField) {
-        currentPlayer.fields.push(fillingField)
-        field.innerHTML = getPlayerIcon()
-        const winner = checkWinner()
-        if (winner) resetGame(winner)
-        else changeCurrentPlayer()
-      }
-    })
+    setComputerStep(mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))[0])
   }
   else {
-    let fillingField = mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0]
+    setComputerStep(mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0])
+  }
+}
 
-    if (!fillingField) {
-      domElements.fields.forEach(field => {
-        const fieldNum = parseInt(field.dataset.num)
-        if (!(players.player.fields.includes(fieldNum) && players.computer.fields.includes(fieldNum))) fillingField = fieldNum
-      })
-    }
-
-    speakComputerStep(fillingField)
-
+function setComputerStep(fillingField) {
+  if (!fillingField) {
     domElements.fields.forEach(field => {
-      if (parseInt(field.dataset.num) === fillingField) {
-        currentPlayer.fields.push(fillingField)
-        field.innerHTML = getPlayerIcon()
-        const winner = checkWinner()
-        if (winner) resetGame(winner)
-        else changeCurrentPlayer()
-      }
+      const fieldNum = parseInt(field.dataset.num)
+      if (!players.player.fields.includes(fieldNum) && !players.computer.fields.includes(fieldNum)) fillingField = fieldNum
     })
   }
+
+  speakComputerStep(fillingField)
+
+  domElements.fields.forEach(field => {
+    if (parseInt(field.dataset.num) === fillingField) {
+      currentPlayer.fields.push(fillingField)
+      field.innerHTML = getPlayerIcon()
+      const winner = checkWinner()
+      if (winner) resetGame(winner)
+      else changeCurrentPlayer()
+    }
+  })
 }
 
 function speakComputerStep(field) {
@@ -139,7 +126,7 @@ function speakComputerStep(field) {
   for (let word in lineMap) {
     if (lineMap[word].includes(field)) words.push(word)
   }
-  speak(`${words[0] === 'time' ? 'time to' : words[0]} ${words[1] === 'time' ? 'time to' : words[1]}`)
+  speak(`${words[0] === 'time' ? 'time to' : words[0]} ${words[1]}`)
 }
 
 function speak(text) {
@@ -166,7 +153,8 @@ function checkWinner() {
   }, false)
 
   if (players.player.fields.length === 13) return 'Game ended in a draw'
-  if (isWinner) return `${currentPlayer.name} win!`
+  if (isWinner) return currentPlayer === players.player ? 'You win!' : 'You lose!'
+  return null
 }
 
 function getPlayerIcon() {
@@ -209,7 +197,7 @@ function setStepOnFieldClick(e) {
         domElements.battleground.removeEventListener('click', setStepOnFieldClick)
         setTimeout(function() {
           domElements.battleground.addEventListener('click', setStepOnFieldClick)
-          setComputerStep()
+          defineComputerStep()
         }, DELAY)
       }
     }
@@ -217,7 +205,7 @@ function setStepOnFieldClick(e) {
 }
 
 function setStepOnSpeech() {
-  const allWords = words.split(' ').reduce((acc, el) => {
+  const allWords = resultWords.split(' ').reduce((acc, el) => {
     if (lineMap[el]) acc.push(lineMap[el])
     return acc
   }, [])
@@ -226,7 +214,7 @@ function setStepOnSpeech() {
     if (winner) resetGame(winner)
     else {
       changeCurrentPlayer()
-      setTimeout(setComputerStep, DELAY)
+      setTimeout(defineComputerStep, DELAY)
     }
   }
   domElements.speakImg.classList.remove('speak__img_blink')
@@ -235,6 +223,7 @@ function setStepOnSpeech() {
 function resetGame(winner) {
   fadeIn(domElements.endPage)
   domElements.endPageResult.textContent = winner
+  speak(winner)
 
   setTimeout(function() {
     domElements.fields.forEach(el => el.innerHTML = '')
@@ -286,8 +275,8 @@ function init() {
   })
 
   recognition.addEventListener("result", function(e) {
-    words = [...e.results].map(result => result[0].transcript).join(' ').toLowerCase()
-    domElements.resultText.textContent = words
+    resultWords = [...e.results].map(result => result[0].transcript).join(' ').toLowerCase()
+    domElements.resultText.textContent = resultWords
   })
 
   recognition.addEventListener("speechend", setStepOnSpeech)
