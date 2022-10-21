@@ -76,8 +76,8 @@ function getRandomInt(max) {
 }
 
 function defineComputerStep() {
-  let mostWeightComputer = [0, []]
-  let mostWeightPlayer = [0, []]
+  let mostWeightComputer = [[0, []]]
+  let mostWeightPlayer = [[0, []]]
 
   winningCombinations.forEach((combination, index) => {
     const weightComputer = combination.reduce((acc, fieldNumber) => {
@@ -91,10 +91,18 @@ function defineComputerStep() {
     }, 0)
 
     if (!(weightComputer && weightPlayer)) {
-      if (mostWeightPlayer[0] < weightPlayer) mostWeightPlayer = [weightPlayer, combination]
-      if (mostWeightComputer[0] < weightComputer) mostWeightComputer = [weightComputer, combination]
+      if (mostWeightPlayer.some(weight => weight[0] < weightPlayer)) mostWeightPlayer.push([weightPlayer, combination])
+      if (mostWeightComputer.some(weight => weight[0] < weightComputer)) mostWeightComputer.push([weightComputer, combination])
     }
   })
+
+  const maxWeightPlayer = Math.max(...mostWeightPlayer.map(weight => weight[0]))
+  mostWeightPlayer = mostWeightPlayer.filter(width => width[0] === maxWeightPlayer)
+  mostWeightPlayer = mostWeightPlayer[Math.floor(Math.random() * mostWeightPlayer.length)]
+
+  const maxWeightComputer = Math.max(...mostWeightComputer.map(weight => weight[0]))
+  mostWeightComputer = mostWeightComputer.filter(width => width[0] === maxWeightComputer)
+  mostWeightComputer = mostWeightComputer[Math.floor(Math.random() * mostWeightComputer.length)]
 
   if (mostWeightPlayer[0] > mostWeightComputer[0]) {
     const stepOptions = mostWeightPlayer[1].filter(fieldNumber => !players.player.fields.includes(fieldNumber))
