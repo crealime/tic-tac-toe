@@ -73,17 +73,6 @@ function fadeOut(hideElement) {
   })
 }
 
-function getTwoRandomProperties(map) {
-  let keys = Object.keys(map)
-  const oneProp = keys[keys.length * Math.random() << 0]
-  const twoProp = keys[keys.length * Math.random() << 0]
-
-  if (oneProp !== twoProp) {
-    return [oneProp, twoProp]
-  }
-  else return getTwoRandomProperties(map)
-}
-
 function setComputerStep() {
   let mostWeightComputer = [0, []]
   let mostWeightPlayer = [0, []]
@@ -122,7 +111,14 @@ function setComputerStep() {
     })
   }
   else {
-    const fillingField = mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0]
+    let fillingField = mostWeightComputer[1].filter(fieldNumber => !players.computer.fields.includes(fieldNumber))[0]
+
+    if (!fillingField) {
+      domElements.fields.forEach(field => {
+        const fieldNum = parseInt(field.dataset.num)
+        if (!(players.player.fields.includes(fieldNum) && players.computer.fields.includes(fieldNum))) fillingField = fieldNum
+      })
+    }
 
     speakComputerStep(fillingField)
 
@@ -135,18 +131,6 @@ function setComputerStep() {
         else changeCurrentPlayer()
       }
     })
-  }
-}
-
-function randomComputerStep() {
-  const properties = getTwoRandomProperties(lineMap)
-  if (players.player.fields.length > 12) return false
-  else if (!findIntersectionOfRows([lineMap[properties[0]], lineMap[properties[1]]])) randomComputerStep()
-  else {
-    speak(`${properties[0] === 'time' ? 'time to' : properties[0]} ${properties[1] === 'time' ? 'time to' : properties[1]}`)
-    const winner = checkWinner()
-    if (winner) resetGame(winner)
-    else changeCurrentPlayer()
   }
 }
 
