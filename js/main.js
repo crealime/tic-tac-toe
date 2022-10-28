@@ -245,6 +245,17 @@ function resetGame(winner) {
   }, DELAY * 2)
 }
 
+function runRecognition() {
+  if (!domElements.speakImg.closest('.speak__img_blink')) {
+    recognition.start()
+    domElements.speakImg.classList.add('speak__img_blink')
+  }
+  else {
+    recognition.stop()
+    domElements.speakImg.classList.remove('speak__img_blink')
+  }
+}
+
 function init() {
   domElements.battleground = document.querySelector('.battleground')
   domElements.fields = document.querySelectorAll('.battleground__field')
@@ -275,15 +286,10 @@ function init() {
     }
   })
 
-  domElements.speakButton.addEventListener('click', function() {
-    if (!domElements.speakImg.closest('.speak__img_blink')) {
-      recognition.start()
-      domElements.speakImg.classList.add('speak__img_blink')
-    }
-    else {
-      recognition.stop()
-      domElements.speakImg.classList.remove('speak__img_blink')
-    }
+  domElements.speakButton.addEventListener('click', runRecognition)
+
+  document.addEventListener('keydown', function(e) {
+    if (e.code === 'Enter' || e.code === 'Space') runRecognition()
   })
 
   recognition.addEventListener("result", function(e) {
