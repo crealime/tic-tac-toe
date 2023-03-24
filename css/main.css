@@ -211,6 +211,27 @@ button:focus {
   display: flex;
   justify-content: center;
   align-items: center;
+  background: var(--color-primary);
+}
+
+.battleground__field_flash {
+  animation-duration: 1s;
+  animation-name: flash;
+  animation-iteration-count: infinite;
+}
+
+@keyframes flash {
+  0% {
+    background: var(--color-primary);
+  }
+
+  50% {
+    background: var(--color-accent);
+  }
+
+  100% {
+    background: var(--color-primary);
+  }
 }
 
 .battleground__img {

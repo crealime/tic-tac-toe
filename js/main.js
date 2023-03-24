@@ -79,7 +79,7 @@ function defineComputerStep() {
   let mostWeightComputer = [[0, []]]
   let mostWeightPlayer = [[0, []]]
 
-  winningCombinations.forEach((combination, index) => {
+  winningCombinations.forEach((combination) => {
     const weightComputer = combination.reduce((acc, fieldNumber) => {
       if (players.computer.fields.includes(fieldNumber)) acc++
       return acc
@@ -166,10 +166,11 @@ function isPlayersFieldsContain(fieldNumber) {
 }
 
 function checkWinner() {
-const isWinner = Boolean(Object.values(winningCombinations).filter(combination => combination.every(fieldNumber => currentPlayer.fields.includes(fieldNumber)))[0])
+  const combination = Object.values(winningCombinations).filter(combination => combination.every(fieldNumber => currentPlayer.fields.includes(fieldNumber)))[0]
+  const isWinner = Boolean(combination)
 
-  if (players.player.fields.length === 13) return 'Game ended in a draw'
-  if (isWinner) return currentPlayer === players.player ? 'You win!' : 'You lose!'
+  if (players.player.fields.length === 13) return {message: 'Game ended in a draw', combination: null}
+  if (isWinner) return currentPlayer === players.player ? {message: 'You win!', combination} : {message: 'You lose!', combination}
   return null
 }
 
@@ -233,16 +234,30 @@ function setStepOnSpeech() {
 }
 
 function resetGame(winner) {
-  fadeIn(domElements.endPage)
-  domElements.endPageResult.textContent = winner
-  speak(winner)
+
+  if (winner.combination) {
+    domElements.fields.forEach(field => {
+      if (winner.combination.includes(parseInt(field.dataset.number))) {
+        field.classList.add('battleground__field_flash')
+      }
+    })
+  }
 
   setTimeout(function() {
-    domElements.fields.forEach(el => el.innerHTML = '')
+    fadeIn(domElements.endPage)
+    domElements.endPageResult.textContent = winner.message
+    speak(winner.message)
+  }, DELAY * 3)
+
+  setTimeout(function() {
+    domElements.fields.forEach(field => {
+      field.classList.remove('battleground__field_flash')
+      field.innerHTML = ''
+    })
     players.player.fields = []
     players.computer.fields = []
     currentPlayer = players.player
-  }, DELAY * 2)
+  }, DELAY * 4)
 }
 
 function runRecognition() {
@@ -273,7 +288,7 @@ function init() {
     lineMap[el.textContent.toLowerCase().split(' ')[0]] = LINES[i]
   })
 
-  domElements.endPageButton.addEventListener('click', function(e) {
+  domElements.endPageButton.addEventListener('click', function() {
     fadeOut(domElements.endPage)
   })
 
